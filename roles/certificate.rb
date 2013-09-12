@@ -1,24 +1,24 @@
 name 'certificate'
 
-default_attributes 'user'              => 'certificate',
-                   'group'             => 'certificate',
-                   'ruby'              => '1.9.3-p392',
-                   'project_fqdn'      => 'certificates.theodi.org',
-                   'mysql_db'          => 'certificate',
-                   'memcached_node'    => 'certificate',
-                   'git_project'       => 'open-data-certificate',
-                   'migration_command' => 'bundle exec rake db:migrate',
+default_attributes 'user'                   => 'certificate',
+                   'group'                  => 'certificate',
+                   'ruby'                   => '1.9.3-p392',
+                   'project_fqdn'           => 'certificates.theodi.org',
+                   'mysql_db'               => 'certificate',
+                   'memcached_node'         => 'certificate',
+                   'git_project'            => 'open-data-certificate',
+                   'migration_command'      => 'bundle exec rake db:migrate',
                    'after_restart_commands' => [
                        'bundle exec rake surveyor:enqueue_surveys',
                        'bundle exec rake cache:clear'
                    ],
-                   'nginx'             => {
+                   'nginx'                  => {
                        'force_ssl'     => true,
                        '301_redirects' => [
                            'certificate.theodi.org'
                        ]
                    },
-                   'chef_client'       => {
+                   'chef_client'            => {
                        'cron'  => {
                            'use_cron_d' => true,
                            'hour'       => "*",
@@ -28,7 +28,11 @@ default_attributes 'user'              => 'certificate',
                        'splay' => 250
 
                    },
-                   'require_memcached' => true
+                   'require_memcached'      => true,
+                   'rvm'                    => {
+                       'user' => 'certificate',
+                       'ruby' => '1.9.3'
+                   }
 
 override_attributes 'envbuilder' => {
     'base_dir' => '/var/www/certificates.theodi.org/shared/config',
@@ -50,4 +54,5 @@ run_list "role[base]",
          "recipe[mysql::client]",
          "recipe[sqlite::dev]",
          "recipe[envbuilder]",
-         "recipe[odi-deployment]"
+         "recipe[odi-deployment]",
+         "recipe[odc-tools::purge_questionnaires]"

@@ -1,4 +1,4 @@
-@odc
+@odc @cron
 Feature: cron jobs
   In order to ODC
   I need some cron jobs

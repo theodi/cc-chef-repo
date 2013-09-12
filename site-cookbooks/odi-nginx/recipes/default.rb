@@ -24,10 +24,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-package "nginx" do
-  action :install
-end
-
 [
     '000-default',
     'default'
@@ -39,136 +35,113 @@ end
   end
 end
 
-service 'nginx' do
-  supports :status => true, :restart => true, :reload => true
-  action :enable
+ssl = node['nginx']['force_ssl']
+
+ssl_tag  = nil
+protocol = 'http'
+if ssl
+  ssl_tag  = '.ssl'
+  protocol = 'https'
 end
 
-#ssl = node['nginx']['force_ssl']
+template "/etc/nginx/sites-available/%s%s" % [
+    node["project_fqdn"],
+    ssl_tag
+] do
 
-#ssl_tag  = nil
-#protocol = 'http'
-#if ssl
-#  ssl_tag  = '.ssl'
-#  protocol = 'https'
-#end
+  port = 80
+  if ssl
+    port = 81
+  end
 
-#prefix = ''
-#if node['nginx']['vhost_prefix'] then
-#  prefix = "%s." % [
-#      node['nginx']['vhost_prefix']
-#  ]
-#end
-#template "/etc/nginx/sites-available/%s%s%s" % [
-#    prefix,
-#    node["project_fqdn"],
-#    ssl_tag
-#] do
-#
-#  port = 80
-#  if ssl
-#    port = 81
-#  end
-#
-#  fqdn = node["project_fqdn"]
-#  if node['nginx']['vhost_prefix'] then
-#    fqdn = "%s.%s" % [
-#        node['nginx']['vhost_prefix'],
-#        fqdn
-#    ]
-#  end
-#
-#  source "vhost.erb"
-#  variables(
-#      :port          => port,
-#      :ssl_tag       => ssl_tag,
-#      :fqdn          => fqdn,
-#      :code_path     => node["project_fqdn"],
-#      :project_name  => node["git_project"],
-#      :static_assets => node["nginx"]["static_assets"]
-#  )
-#  action :create
-#end
+  source "vhost.erb"
+  variables(
+      :port          => port,
+      :ssl_tag       => ssl_tag,
+      :fqdn          => node["project_fqdn"],
+      :project_name  => node["git_project"],
+      :static_assets => node["nginx"]["static_assets"]
+  )
+  action :create
+end
 
-#link "/etc/nginx/sites-enabled/%s%s%s" % [
-#    prefix,
-#    node["project_fqdn"],
-#    ssl_tag
-#] do
-#  to "/etc/nginx/sites-available/%s%s%s" % [
-#      prefix,
-#      node["project_fqdn"],
-#      ssl_tag
-#  ]
+link "/etc/nginx/sites-enabled/%s%s" % [
+    node["project_fqdn"],
+    ssl_tag
+] do
+  to "/etc/nginx/sites-available/%s%s" % [
+      node["project_fqdn"],
+      ssl_tag
+  ]
 
-#  notifies :restart, "service[nginx]"
-#end
+  notifies :restart, "service[nginx]"
+end
 
-#if ssl
-#  template "/etc/nginx/sites-available/%s" % [
-#      node["project_fqdn"]
-#  ] do
-#    source "redirect.erb"
-#    variables(
-#        :this     => node["project_fqdn"],
-#        :that     => node["project_fqdn"],
-#        :port     => 80,
-#        :protocol => protocol,
-#        :ssl_tag  => nil
-#    )
-#  end
+if ssl
+  template "/etc/nginx/sites-available/%s" % [
+      node["project_fqdn"]
+  ] do
+    source "redirect.erb"
+    variables(
+        :this     => node["project_fqdn"],
+        :that     => node["project_fqdn"],
+        :port     => 80,
+        :protocol => protocol,
+        :ssl_tag  => nil
+    )
+  end
 
-#  link "/etc/nginx/sites-enabled/%s" % [
-#      node["project_fqdn"]
-#  ] do
-#    to "/etc/nginx/sites-available/%s" % [
-#        node["project_fqdn"]
-#    ]
+  link "/etc/nginx/sites-enabled/%s" % [
+      node["project_fqdn"]
+  ] do
+    to "/etc/nginx/sites-available/%s" % [
+        node["project_fqdn"]
+    ]
 
-#    notifies :restart, "service[nginx]"
-#  end
-#end
+    notifies :restart, "service[nginx]"
+  end
+end
 
-#if node['nginx']["301_redirects"]
-#  node['nginx']["301_redirects"].each do |r|
+if node['nginx']["301_redirects"]
+  node['nginx']["301_redirects"].each do |r|
 
-#    ports = [
-#        80
-#    ]
-#    if ssl
-#      ports << 81
-#    end
+    ports = [
+        80
+    ]
+    if ssl
+      ports << 81
+    end
 
-#    ports.each do |port|
-#      ssl_tag = nil
-#      if port == 81
-#        ssl_tag = '.ssl'
-#      end
-#      template "/etc/nginx/sites-available/%s%s" % [
-#          r,
-#          ssl_tag
-#      ] do
-#        source "redirect.erb"
-#        variables(
-#            :this     => node["project_fqdn"],
-#            :that     => r,
-#            :port     => port,
-#            :protocol => protocol,
-#            :ssl_tag  => ssl_tag
-#        )
-#      end
+    ports.each do |port|
+      ssl_tag = nil
+      if port == 81
+        ssl_tag = '.ssl'
+      end
+      template "/etc/nginx/sites-available/%s%s" % [
+          r,
+          ssl_tag
+      ] do
+        source "redirect.erb"
+        variables(
+            :this     => node["project_fqdn"],
+            :that     => r,
+            :port     => port,
+            :protocol => protocol,
+            :ssl_tag  => ssl_tag
+        )
+      end
 
-#      link "/etc/nginx/sites-enabled/%s%s" % [
-#          r,
-#          ssl_tag
-#      ] do
-#        to "/etc/nginx/sites-available/%s%s" % [
-#            r,
-#            ssl_tag
-#        ]
-#
-#        notifies :restart, "service[nginx]"
-#      end
-#    end
-#  end
-#end
+      link "/etc/nginx/sites-enabled/%s%s" % [
+          r,
+          ssl_tag
+      ] do
+        to "/etc/nginx/sites-available/%s%s" % [
+            r,
+            ssl_tag
+        ]
+
+        notifies :restart, "service[nginx]"
+      end
+    end
+  end
+end

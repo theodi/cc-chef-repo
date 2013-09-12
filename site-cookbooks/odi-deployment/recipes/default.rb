@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: quirkafleeg-deployment
+# Cookbook Name:: odi-deployment
 # Recipe:: default
 #
 # Copyright 2013, The Open Data Institute
@@ -24,170 +24,168 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-class Chef::Recipe
-  include ODI::Deployment::Helpers
-end
+include_recipe 'git'
 
-deploy_root = node[:deployment][:root]
-domain      = get_domain
-
-[
-    deploy_root,
-    "/etc/nginx/sites-enabled"
-].each do |dir|
-  directory dir do
-    action :create
-    recursive true
-  end
-end
-
-mysql_ip = find_a 'mysql'
-
-dbi = data_bag_item node['databags']['primary'], 'databases'
-
-precompile_assets = node[:deployment][:precompile_assets].nil? ? true : node[:deployment][:precompile_assets]
-port              = node[:deployment][:port]
-root_dir          = "%s/%s" % [
-    deploy_root,
-    node[:project_fqdn]
-]
-
-make_shared_dirs root_dir
-
-deploy_revision root_dir do
-  user node[:user]
-  group node[:user]
-
-  environment(
-      "RACK_ENV" => node[:deployment][:rack_env],
-      "HOME"     => "/home/%s" % [
-          user
-      ]
-  )
-
-  keep_releases 10
-  rollback_on_error true
-  migrate           = node.has_key? :migrate
-  migration_command = node[:migrate]
-
-  revision node[:deployment][:revision]
-
-  repo "git://github.com/theodi/%s.git" % [
-      node[:git_project]
+if [
+    'experimental',
+    'production',
+    'odc-production',
+    'cucumber'
+].include? node.chef_environment
+  root_dir = "/var/www/%s" % [
+      node['project_fqdn']
   ]
 
-  before_migrate do
-    current_release_directory = release_path
-    running_deploy_user       = new_resource.user
-    shared_directory          = new_resource.shared_path
-    bundler_depot             = new_resource.shared_path + '/bundle'
-
-    begin
-      mysql_password = dbi[node[:database]][node.chef_environment]
-    rescue
-      mysql_password = 'ThisPasswordIntentionallyLeftBlank'
+  [
+      "",
+      "shared",
+      "shared/config",
+      "shared/pids",
+      "shared/log",
+      "shared/system"
+  ].each do |d|
+    directory "%s/%s" % [
+        root_dir,
+        d
+    ] do
+      owner node['user']
+      group node['group']
+      action :create
+      mode "0775"
+      recursive true
     end
+  end
 
-    {
-        'database.yml' => {
-            :mysql_host     => mysql_ip,
-            :mysql_database => node[:database],
-            :mysql_username => node[:database],
-            :mysql_password => mysql_password
-        }
-    }.each_pair do |name, params|
-      template '%s/config/%s' % [
-          shared_directory,
-          name
+  dbi     = data_bag_item "databases", "credentials"
+  db_pass = dbi[node['mysql_db']][node.chef_environment]
+
+  db_box = search(:node, "name:mysql-#{node['mysql_db']}* AND chef_environment:#{node.chef_environment}")[0]
+  db_ip  = db_box["ipaddress"]
+  if db_box["rackspace"]
+    db_ip = db_box["rackspace"]["private_ip"]
+  end
+
+  mcs             = search(:node, "name:memcached-#{node['memcached_node']}* AND chef_environment:#{node.chef_environment}")
+
+  deploy_revision root_dir do
+    user node['user']
+    group node['group']
+    environment "RACK_ENV" => node['RACK_ENV'],
+                "HOME"     => "/home/#{user}"
+
+    keep_releases 10
+    rollback_on_error true
+
+    repo "git://github.com/theodi/%s.git" % [
+        node['git_project']
+    ]
+
+    revision node['deploy']['revision']
+    symlink_before_migrate.clear
+
+    before_migrate do
+      current_release_directory = release_path
+      running_deploy_user       = new_resource.user
+      bundler_depot             = new_resource.shared_path + '/bundle'
+
+      template "%s/%s/%s" % [
+          current_release_directory,
+          "config",
+          "database.yml"
       ] do
-        source "%s.erb" % [
-            name
-        ]
-        variables(
-            params
-        )
-        user node['user']
-        group node['user']
-        mode "0644"
         action :create
+        source "database.yml.erb"
+        owner running_deploy_user
+        group running_deploy_user
+        variables(
+            :database => node['mysql_db'],
+            :db_user  => node['mysql_db'],
+            :db_pass  => db_pass,
+            :db_host  => db_ip
+        )
       end
 
-      db_conf_symlink name do
-        shared_dir shared_directory
-        current_dir current_release_directory
+      script 'Link me some links' do
+        interpreter 'bash'
+        cwd current_release_directory
+        user running_deploy_user
+        code <<-EOF
+        ln -sf ../../shared/config/env .env
+        EOF
       end
-    end
 
-    script 'Symlink env' do
-      interpreter 'bash'
-      cwd current_release_directory
-      user running_deploy_user
-      code <<-EOF
-        ln -sf /home/#{user}/env .env
-      EOF
-    end
-
-    script 'Bundling' do
-      interpreter 'bash'
-      cwd current_release_directory
-      user running_deploy_user
-      code <<-EOF
+      script 'Bundling the gems' do
+        interpreter 'bash'
+        cwd current_release_directory
+        user running_deploy_user
+        code <<-EOF
         bundle install \
-          --without=development test\
+          --without=development \
           --quiet \
           --path #{bundler_depot}
-      EOF
+        EOF
+      end
+
+      script 'Precompile the assets' do
+        interpreter 'bash'
+        cwd current_release_directory
+        user running_deploy_user
+        code <<-EOF
+        RAILS_ENV=production bundle exec rake assets:precompile
+        EOF
+      end
     end
 
-    script 'Precompiling assets' do
-      interpreter 'bash'
-      cwd current_release_directory
-      user running_deploy_user
-      code <<-EOF
-        RAILS_ENV=#{node[:deployment][:rack_env]} bundle exec rake assets:precompile
-      EOF
-      only_if { precompile_assets }
+    migration_command node["migration_command"]
+    migrate node['deploy']['migrate']
+
+    before_restart do
+      current_release_directory = release_path
+      running_deploy_user       = new_resource.user
+
+      if node['require_memcached']
+        memcached_nodes = []
+        mcs.each do |mc|
+          ip = mc['ipaddress']
+          if mc['rackspace']
+            ip = mc['rackspace']['private_ip']
+          end
+
+          memcached_nodes << ip
+        end
+
+        e = "%s/.env.%s" % [
+            current_release_directory,
+            node["RACK_ENV"]
+        ]
+
+        f = File.open e, "a"
+
+        f.write "MEMCACHED_HOSTS: %s\n" % [
+            memcached_nodes.join(" ")
+        ]
+        f.close
+        FileUtils.chown running_deploy_user, running_deploy_user, e
+      end
+
+      script 'Generate startup scripts with Foreman' do
+        interpreter 'bash'
+        cwd current_release_directory
+        user running_deploy_user
+        code <<-EOF
+        export rvmsudo_secure_path=1
+        /home/#{user}/.rvm/bin/rvmsudo bundle exec foreman export \
+          -a #{node['git_project']} \
+          -u #{node['user']} \
+          -t config/foreman \
+          -p 3000 \
+          upstart /etc/init
+        EOF
+      end
     end
+
+    restart_command "sudo service #{node['git_project']} restart"
+    action :deploy
   end
-
-  before_restart do
-    current_release_directory = release_path
-    running_deploy_user       = new_resource.user
-
-    foremanise node[:git_project] do
-      cwd current_release_directory
-      user running_deploy_user
-      port port
-    end
-
-    template "%s/vhost" % [
-        current_release_directory
-    ] do
-      source "vhost.erb"
-      variables(
-          :servername    => node[:git_project],
-          :port          => node[:deployment][:port],
-          :domain        => domain,
-          :static_assets => precompile_assets
-      )
-      action :create
-    end
-
-    link "/etc/nginx/sites-enabled/%s" % [
-        node[:project_fqdn]
-    ] do
-      to "%s/vhost" % [
-          current_release_directory
-      ]
-    end
-  end
-
-  restart_command "sudo service %s restart" % [
-      node[:git_project]
-  ]
-  notifies :restart, "service[nginx]"
-
-  action :deploy
 
 end
-

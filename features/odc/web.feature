@@ -13,65 +13,65 @@ Feature: webserver
     * package "git" should be installed
     * package "curl" should be installed
 
-#  Scenario: User 'certificate' exists
-#    * I run "su - certificate -c 'echo ${SHELL}'"
-#    * I should see "/bin/bash" in the output
-#
-#  Scenario: User can sudo with no password
-#  # we cannot test this properly on Vagrant!
-#  #  * I run "su - certificate -c 'sudo bash'"
-#  #  * I should not see "password for certificate" in the output
-#  # So we compromise with this
-#    * file "/etc/sudoers.d/certificate" should exist
-#    * file "/etc/sudoers.d/certificate" should contain
-#    """
-#certificate ALL=NOPASSWD:ALL
-#    """
-#    * file "/etc/sudoers" should contain
-#    """
-##includedir /etc/sudoers.d
-#    """
-#    * I run "stat -c %a /etc/sudoers.d/certificate"
-#    * I should see "440" in the output
-#
-#  Scenario: Ruby 1.9.3-p392 is installed
-#    * I run "su - certificate -c 'ruby -v'"
-#    * I should see "1.9.3p392" in the output
-#
-#  Scenario: Gem dependencies are installed
-#    * package "libxml2-dev" should be installed
-#    * package "libxslt1-dev" should be installed
-#    * package "libcurl4-openssl-dev" should be installed
-#    * package "libmysqlclient-dev" should be installed
-#    When I run "node -h"
-#    Then I should not see "command not found" in the output
-#
-#  Scenario: nginx is installed
-#    * package "nginx" should be installed
-#
-#  Scenario: The env file exists
-#    * file "/var/www/certificates.theodi.org/shared/config/env" should exist
-#
-#  Scenario: The env file contains the correct stuff
-#    When I run "cat /var/www/certificates.theodi.org/shared/config/env"
-#    Then I should see "JENKINS_URL: http://jenkins.theodi.org" in the output
-#    And I should see "RESQUE_REDIS_HOST: 151" in the output
-#    And I should see "EVENTBRITE_API_KEY: IZ" in the output
-#    And I should see "CAPSULECRM_DEFAULT_OWNER: ri" in the output
-#    And I should see "LEFTRONIC_GITHUB_OUTGOING_PRS: d" in the output
-#    And I should see "COURSES_TARGET_URL: http:" in the output
-#    And I should see "TRELLO_DEV_KEY: a1" in the output
-#    And I should see "GITHUB_OUATH_TOKEN: 18" in the output
-#    And I should see "GOOGLE_ANALYTICS_TRACKER: UA-3" in the output
-#    And I should see "XERO_PRIVATE_KEY_PATH: /etc" in the output
-#    And I should see "COURSES_RSYNC_PATH: json" in the output
-#
-#  @env
-#  Scenario: environment-specific env file contains correct stuff
-#    When I run "cat /var/www/certificates.theodi.org/current/.env.production"
-#    Then I should see "MEMCACHED_HOSTS: 192.168.77.50" in the output
-#    And file "/var/www/certificates.theodi.org/current/.env.production" should be owned by "certificate:certificate"
-#
+  Scenario: User 'certificate' exists
+    * I run "su - certificate -c 'echo ${SHELL}'"
+    * I should see "/bin/bash" in the output
+
+  Scenario: User can sudo with no password
+  # we cannot test this properly on Vagrant!
+  #  * I run "su - certificate -c 'sudo bash'"
+  #  * I should not see "password for certificate" in the output
+  # So we compromise with this
+    * file "/etc/sudoers.d/certificate" should exist
+    * file "/etc/sudoers.d/certificate" should contain
+    """
+certificate ALL=NOPASSWD:ALL
+    """
+    * file "/etc/sudoers" should contain
+    """
+#includedir /etc/sudoers.d
+    """
+    * I run "stat -c %a /etc/sudoers.d/certificate"
+    * I should see "440" in the output
+
+  Scenario: Ruby 1.9.3 is installed
+    * I run "su - certificate -c 'ruby -v'"
+    * I should see "1.9.3" in the output
+
+  Scenario: Gem dependencies are installed
+    * package "libxml2-dev" should be installed
+    * package "libxslt1-dev" should be installed
+    * package "libcurl4-openssl-dev" should be installed
+    * package "libmysqlclient-dev" should be installed
+    When I run "node -h"
+    Then I should not see "command not found" in the output
+
+  Scenario: nginx is installed
+    * package "nginx" should be installed
+
+  Scenario: The env file exists
+    * file "/var/www/certificates.theodi.org/shared/config/env" should exist
+
+  Scenario: The env file contains the correct stuff
+    When I run "cat /var/www/certificates.theodi.org/shared/config/env"
+    Then I should see "JENKINS_URL: http://jenkins.theodi.org" in the output
+    And I should see "RESQUE_REDIS_HOST: 151" in the output
+    And I should see "EVENTBRITE_API_KEY: IZ" in the output
+    And I should see "CAPSULECRM_DEFAULT_OWNER: ri" in the output
+    And I should see "LEFTRONIC_GITHUB_OUTGOING_PRS: d" in the output
+    And I should see "COURSES_TARGET_URL: http:" in the output
+    And I should see "TRELLO_DEV_KEY: a1" in the output
+    And I should see "GITHUB_OUATH_TOKEN: 18" in the output
+    And I should see "GOOGLE_ANALYTICS_TRACKER: UA-3" in the output
+    And I should see "XERO_PRIVATE_KEY_PATH: /etc" in the output
+    And I should see "COURSES_RSYNC_PATH: json" in the output
+
+  @env
+  Scenario: environment-specific env file contains correct stuff
+    When I run "cat /var/www/certificates.theodi.org/current/.env.production"
+    Then I should see "MEMCACHED_HOSTS: 192.168.99.10" in the output
+    And file "/var/www/certificates.theodi.org/current/.env.production" should be owned by "certificate:certificate"
+
 #  Scenario: Code is deployed
 #    * directory "/var/www/certificates.theodi.org" should exist
 #    * directory "/var/www/certificates.theodi.org/releases" should exist

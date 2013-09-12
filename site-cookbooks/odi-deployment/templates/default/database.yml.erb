@@ -1,7 +1,9 @@
 production:
   adapter: mysql2
-  database: <%= @mysql_database %>
-  username: <%= @mysql_username %>
-  password: <%= @mysql_password %>
-  host: <%= @mysql_host %>
+  encoding: utf8
   port: 3306
+  database: <%= @database %>
+  pool: 5
+  username: <%= @db_user %>
+  password: <%= @db_pass %>
+  host: <%= @db_host %>
