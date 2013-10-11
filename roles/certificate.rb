@@ -6,6 +6,7 @@ default_attributes 'user'                   => 'certificate',
                    'project_fqdn'           => 'certificates.theodi.org',
                    'mysql_db'               => 'certificate',
                    'memcached_node'         => 'certificate',
+                   'has_juvia'              => true,
                    'git_project'            => 'open-data-certificate',
                    'migration_command'      => 'bundle exec rake db:migrate',
                    'after_restart_commands' => [
@@ -31,7 +32,7 @@ default_attributes 'user'                   => 'certificate',
                    'require_memcached'      => true,
                    'rvm'                    => {
                        'user' => 'certificate',
-                       'ruby' => '1.9.3'
+                       'ruby' => '1.9.3-p392'
                    }
 
 override_attributes 'envbuilder' => {
