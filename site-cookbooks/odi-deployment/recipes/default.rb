@@ -65,7 +65,7 @@ if [
     db_ip = db_box["rackspace"]["private_ip"]
   end
 
-  mcs             = search(:node, "name:memcached-#{node['memcached_node']}* AND chef_environment:#{node.chef_environment}")
+  mcs = search(:node, "name:memcached-#{node['memcached_node']}* AND chef_environment:#{node.chef_environment}")
 
   deploy_revision root_dir do
     user node['user']
@@ -143,6 +143,11 @@ if [
       current_release_directory = release_path
       running_deploy_user       = new_resource.user
 
+      e = "%s/.env.%s" % [
+          current_release_directory,
+          node["RACK_ENV"]
+      ]
+
       if node['require_memcached']
         memcached_nodes = []
         mcs.each do |mc|
@@ -154,11 +159,6 @@ if [
           memcached_nodes << ip
         end
 
-        e = "%s/.env.%s" % [
-            current_release_directory,
-            node["RACK_ENV"]
-        ]
-
         f = File.open e, "a"
 
         f.write "MEMCACHED_HOSTS: %s\n" % [
@@ -166,6 +166,17 @@ if [
         ]
         f.close
         FileUtils.chown running_deploy_user, running_deploy_user, e
+      end
+
+      if node["has_juvia"]
+        dbi = data_bag_item "juvia", "sitekeys"
+
+        f = File.open e, "a"
+        f.write "JUVIA_SITE_KEY: %s\n" % [
+            dbi[node["project_fqdn"]][node["RACK_ENV"]]
+        ]
+
+        f.close
       end
 
       script 'Generate startup scripts with Foreman' do
