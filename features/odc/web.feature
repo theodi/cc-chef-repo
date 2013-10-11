@@ -69,135 +69,136 @@ certificate ALL=NOPASSWD:ALL
   @env
   Scenario: environment-specific env file contains correct stuff
     When I run "cat /var/www/certificates.theodi.org/current/.env.production"
-    Then I should see "MEMCACHED_HOSTS: 192.168.99.10" in the output
+    Then I should see "MEMCACHED_HOSTS: 192.168.98.10" in the output
+    Then I should see "JUVIA_SITE_KEY: thisisafakesitekey" in the output
     And file "/var/www/certificates.theodi.org/current/.env.production" should be owned by "certificate:certificate"
 
-#  Scenario: Code is deployed
-#    * directory "/var/www/certificates.theodi.org" should exist
-#    * directory "/var/www/certificates.theodi.org/releases" should exist
-#    * directory "/var/www/certificates.theodi.org/shared" should exist
-#    * directory "/var/www/certificates.theodi.org/shared/config" should exist
-#    * directory "/var/www/certificates.theodi.org/shared/pid" should exist
-#    * directory "/var/www/certificates.theodi.org/shared/log" should exist
-#    * directory "/var/www/certificates.theodi.org/shared/system" should exist
-#
-#  @config
-#  Scenario: configuration stuff is correct
-#    * file "/var/www/certificates.theodi.org/current/config/database.yml" should exist
-#    * file "/var/www/certificates.theodi.org/current/config/database.yml" should be owned by "certificate:certificate"
-#    * symlink "/var/www/certificates.theodi.org/current/.env" should exist
-#    When I run "stat -c %N /var/www/certificates.theodi.org/current/.env"
-#    Then I should see "../../shared/config/env" in the output
-#    When I run "cat /var/www/certificates.theodi.org/current/config/database.yml"
-#    Then I should see "production:" in the output
-#    And I should see "adapter: mysql2" in the output
-#    And I should see "port: 3306" in the output
-#    And I should see "host: 192.168.77.51" in the output
-#    And I should see "database: certificate" in the output
-#    And I should see "username: certificate" in the output
-#    And I should see "password: etacifitrec" in the output
-#
-#  Scenario: Assets have been compiled
-#    * directory "/var/www/certificates.theodi.org/current/public/assets/" should exist
-#
-#  @startup
-#  Scenario: Startup scripts are in play
-#    * file "/etc/init/open-data-certificate.conf" should exist
-#    * file "/etc/init/open-data-certificate-thin.conf" should exist
-#    * file "/etc/init/open-data-certificate-thin-1.conf" should exist
-#    When I run "cat /etc/init/open-data-certificate-thin-1.conf"
-#    Then I should see "exec su - certificate" in the output
-#    And I should see "export PORT=3000" in the output
-#  #    And I should see "RACK_ENV=production" in the output
-#    And I should see "/var/log/open-data-certificate/thin-1.log" in the output
-#
-#  @nginx
-#  Scenario: nginx default vhost is disabled
-#    * symlink "/etc/nginx/sites-enabled/default" should not exist
-#
-#  @nginx
-#  Scenario: certificates on port 81 should be the ultimate destination
-#    * file "/etc/nginx/sites-available/certificates.theodi.org.ssl" should contain
-#    """
-#upstream open-data-certificate {
-#  server 127.0.0.1:3000;
-#}
-#
-#server {
-#  listen 81 default;
-#  server_name certificates.theodi.org;
-#  access_log /var/log/nginx/certificates.theodi.org.ssl.log;
-#  error_log /var/log/nginx/certificates.theodi.org.ssl.err;
-#  location / {
-#    try_files $uri @backend;
-#  }
-#
-#  location ~ ^/(assets)/  {
-#    root /var/www/certificates.theodi.org/current/public/;
-#    gzip_static on; # to serve pre-gzipped version
-#    expires max;
-#    add_header Cache-Control public;
-#  }
-#
-#  location @backend {
-#    proxy_set_header X-Forwarded-Proto 'http';
-#    proxy_set_header Host $server_name;
-#    proxy_pass http://open-data-certificate;
-#  }
-#}
-#    """
-#    * symlink "/etc/nginx/sites-enabled/certificates.theodi.org.ssl" should exist
-#
-#  @nginx @redirect
-#  Scenario: certificates on port 80 should redirect
-#    * file "/etc/nginx/sites-available/certificates.theodi.org" should contain
-#    """
-#server {
-#  listen 80;
-#  server_name certificates.theodi.org;
-#  access_log /var/log/nginx/certificates.theodi.org.log;
-#  error_log /var/log/nginx/certificates.theodi.org.err;
-#  rewrite  ^/(.*)$ https://certificates.theodi.org/$1 permanent;
-#}
-#      """
-#    * symlink "/etc/nginx/sites-enabled/certificates.theodi.org" should exist
-#
-#  @nginx @redirect @wip
-#Scenario: certificate on port 80 should redirect
-#  * file "/etc/nginx/sites-available/certificate.theodi.org" should contain
-#  """
-#server {
-#  listen 80;
-#  server_name certificate.theodi.org;
-#  access_log /var/log/nginx/certificate.theodi.org.log;
-#  error_log /var/log/nginx/certificate.theodi.org.err;
-#  rewrite  ^/(.*)$ https://certificates.theodi.org/$1 permanent;
-#}
-#      """
-#  * symlink "/etc/nginx/sites-enabled/certificate.theodi.org" should exist
-#
-#@nginx @redirect @wip
-#Scenario: certificate on port 81 should redirect
-#  * file "/etc/nginx/sites-available/certificate.theodi.org.ssl" should contain
-#  """
-#server {
-#  listen 81;
-#  server_name certificate.theodi.org;
-#  access_log /var/log/nginx/certificate.theodi.org.ssl.log;
-#  error_log /var/log/nginx/certificate.theodi.org.ssl.err;
-#  rewrite  ^/(.*)$ https://certificates.theodi.org/$1 permanent;
-#}
-#      """
-#  * symlink "/etc/nginx/sites-enabled/certificate.theodi.org.ssl" should exist
-#
-##  Scenario: nginx should be restarted
-### we can't really test this
-#
-#  @chef-client
-#  Scenario: chef-client is cronned
-#    When I run "cat /etc/cron.d/chef-client"
-#    Then I should see "/usr/bin/chef-client &> /var/log/chef/cron.log" in the output
-#
+  Scenario: Code is deployed
+    * directory "/var/www/certificates.theodi.org" should exist
+    * directory "/var/www/certificates.theodi.org/releases" should exist
+    * directory "/var/www/certificates.theodi.org/shared" should exist
+    * directory "/var/www/certificates.theodi.org/shared/config" should exist
+    * directory "/var/www/certificates.theodi.org/shared/pid" should exist
+    * directory "/var/www/certificates.theodi.org/shared/log" should exist
+    * directory "/var/www/certificates.theodi.org/shared/system" should exist
+
+  @config
+  Scenario: configuration stuff is correct
+    * file "/var/www/certificates.theodi.org/current/config/database.yml" should exist
+    * file "/var/www/certificates.theodi.org/current/config/database.yml" should be owned by "certificate:certificate"
+    * symlink "/var/www/certificates.theodi.org/current/.env" should exist
+    When I run "stat -c %N /var/www/certificates.theodi.org/current/.env"
+    Then I should see "../../shared/config/env" in the output
+    When I run "cat /var/www/certificates.theodi.org/current/config/database.yml"
+    Then I should see "production:" in the output
+    And I should see "adapter: mysql2" in the output
+    And I should see "port: 3306" in the output
+    And I should see "host: 192.168.98.20" in the output
+    And I should see "database: certificate" in the output
+    And I should see "username: certificate" in the output
+    And I should see "password: etacifitrec" in the output
+
+  Scenario: Assets have been compiled
+    * directory "/var/www/certificates.theodi.org/current/public/assets/" should exist
+
+  @startup
+  Scenario: Startup scripts are in play
+    * file "/etc/init/open-data-certificate.conf" should exist
+    * file "/etc/init/open-data-certificate-thin.conf" should exist
+    * file "/etc/init/open-data-certificate-thin-1.conf" should exist
+    When I run "cat /etc/init/open-data-certificate-thin-1.conf"
+    Then I should see "exec su - certificate" in the output
+    And I should see "export PORT=3000" in the output
+  #    And I should see "RACK_ENV=production" in the output
+    And I should see "/var/log/open-data-certificate/thin-1.log" in the output
+
+  @nginx
+  Scenario: nginx default vhost is disabled
+    * symlink "/etc/nginx/sites-enabled/default" should not exist
+
+  @nginx
+  Scenario: certificates on port 81 should be the ultimate destination
+    * file "/etc/nginx/sites-available/certificates.theodi.org.ssl" should contain
+    """
+upstream open-data-certificate {
+  server 127.0.0.1:3000;
+}
+
+server {
+  listen 81 default;
+  server_name certificates.theodi.org;
+  access_log /var/log/nginx/certificates.theodi.org.ssl.log;
+  error_log /var/log/nginx/certificates.theodi.org.ssl.err;
+  location / {
+    try_files $uri @backend;
+  }
+
+  location ~ ^/(assets)/  {
+    root /var/www/certificates.theodi.org/current/public/;
+    gzip_static on; # to serve pre-gzipped version
+    expires max;
+    add_header Cache-Control public;
+  }
+
+  location @backend {
+    proxy_set_header X-Forwarded-Proto 'http';
+    proxy_set_header Host $server_name;
+    proxy_pass http://open-data-certificate;
+  }
+}
+    """
+    * symlink "/etc/nginx/sites-enabled/certificates.theodi.org.ssl" should exist
+
+  @nginx @redirect
+  Scenario: certificates on port 80 should redirect
+    * file "/etc/nginx/sites-available/certificates.theodi.org" should contain
+    """
+server {
+  listen 80;
+  server_name certificates.theodi.org;
+  access_log /var/log/nginx/certificates.theodi.org.log;
+  error_log /var/log/nginx/certificates.theodi.org.err;
+  rewrite  ^/(.*)$ https://certificates.theodi.org/$1 permanent;
+}
+      """
+    * symlink "/etc/nginx/sites-enabled/certificates.theodi.org" should exist
+
+  @nginx @redirect @wip
+  Scenario: certificate on port 80 should redirect
+    * file "/etc/nginx/sites-available/certificate.theodi.org" should contain
+    """
+server {
+  listen 80;
+  server_name certificate.theodi.org;
+  access_log /var/log/nginx/certificate.theodi.org.log;
+  error_log /var/log/nginx/certificate.theodi.org.err;
+  rewrite  ^/(.*)$ https://certificates.theodi.org/$1 permanent;
+}
+      """
+  * symlink "/etc/nginx/sites-enabled/certificate.theodi.org" should exist
+
+@nginx @redirect @wip
+Scenario: certificate on port 81 should redirect
+  * file "/etc/nginx/sites-available/certificate.theodi.org.ssl" should contain
+  """
+server {
+  listen 81;
+  server_name certificate.theodi.org;
+  access_log /var/log/nginx/certificate.theodi.org.ssl.log;
+  error_log /var/log/nginx/certificate.theodi.org.ssl.err;
+  rewrite  ^/(.*)$ https://certificates.theodi.org/$1 permanent;
+}
+      """
+  * symlink "/etc/nginx/sites-enabled/certificate.theodi.org.ssl" should exist
+
+#  Scenario: nginx should be restarted
+## we can't really test this
+
+  @chef-client
+  Scenario: chef-client is cronned
+    When I run "cat /etc/cron.d/chef-client"
+    Then I should see "/usr/bin/chef-client &> /var/log/chef/cron.log" in the output
+
 #  @logstash
 #  Scenario: logstash agent is correctly configured
 #    * file "/opt/logstash/agent/etc/shipper.conf" should contain
