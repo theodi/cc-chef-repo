@@ -52,6 +52,7 @@ certificate ALL=NOPASSWD:ALL
   Scenario: The env file exists
     * file "/var/www/certificates.theodi.org/shared/config/env" should exist
 
+  @env
   Scenario: The env file contains the correct stuff
     When I run "cat /var/www/certificates.theodi.org/shared/config/env"
     Then I should see "JENKINS_URL: http://jenkins.theodi.org" in the output
@@ -65,12 +66,11 @@ certificate ALL=NOPASSWD:ALL
     And I should see "GOOGLE_ANALYTICS_TRACKER: UA-3" in the output
     And I should see "XERO_PRIVATE_KEY_PATH: /etc" in the output
     And I should see "COURSES_RSYNC_PATH: json" in the output
+    And I should see "CERTIFICATE_JUVIA_SITE_KEY: thisisafakesitekeyforstaging" in the output
 
-  @env
   Scenario: environment-specific env file contains correct stuff
     When I run "cat /var/www/certificates.theodi.org/current/.env.production"
     Then I should see "MEMCACHED_HOSTS: 192.168.98.10" in the output
-    Then I should see "JUVIA_SITE_KEY: thisisafakesitekey" in the output
     And file "/var/www/certificates.theodi.org/current/.env.production" should be owned by "certificate:certificate"
 
   Scenario: Code is deployed

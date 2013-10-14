@@ -42,6 +42,7 @@ override_attributes 'envbuilder' => {
 }
 
 run_list "role[base]",
+         "recipe[odi-chef-client::config]",
          "recipe[chef-client::cron]",
          "recipe[build-essential]",
          "recipe[nginx]",

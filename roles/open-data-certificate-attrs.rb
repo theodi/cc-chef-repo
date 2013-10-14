@@ -6,11 +6,11 @@ default_attributes(
         'memory' => 768
     },
 
-    :project        => 'open-data-certificate',
-    :databags       => {
-        :primary => 'odc'
+    "project"        => 'open-data-certificate',
+    "databags"       => {
+        "primary" => 'odc'
     },
-    :database       => 'certificate'
+    "database"       => 'certificate'
 )
 
 
