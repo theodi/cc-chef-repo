@@ -51,6 +51,7 @@ server {
   server_name contentapi.theodi.org;
   access_log /var/log/nginx/contentapi.log;
   error_log /var/log/nginx/contentapi.err;
+  root /var/www/contentapi/current/public/;
 
   location / {
     try_files $uri @backend;

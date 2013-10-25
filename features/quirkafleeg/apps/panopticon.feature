@@ -54,13 +54,13 @@ server {
   server_name panopticon.theodi.org;
   access_log /var/log/nginx/panopticon.log;
   error_log /var/log/nginx/panopticon.err;
+  root /var/www/panopticon/current/public/;
 
   location / {
     try_files $uri @backend;
   }
 
   location ~ ^/(assets)/  {
-    root /var/www/panopticon/current/public/;
     gzip_static on; # to serve pre-gzipped version
     expires max;
     add_header Cache-Control public;

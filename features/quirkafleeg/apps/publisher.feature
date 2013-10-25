@@ -54,13 +54,13 @@ server {
   server_name publisher.theodi.org;
   access_log /var/log/nginx/publisher.log;
   error_log /var/log/nginx/publisher.err;
+  root /var/www/publisher/current/public/;
 
   location / {
     try_files $uri @backend;
   }
 
   location ~ ^/(assets)/  {
-    root /var/www/publisher/current/public/;
     gzip_static on; # to serve pre-gzipped version
     expires max;
     add_header Cache-Control public;

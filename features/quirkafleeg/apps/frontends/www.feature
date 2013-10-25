@@ -54,6 +54,7 @@ server {
   server_name theodi.org;
   access_log /var/log/nginx/www.log;
   error_log /var/log/nginx/www.err;
+  root /var/www/www/current/public/;
 
   location / {
     try_files $uri @backend;

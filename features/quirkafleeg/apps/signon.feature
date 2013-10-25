@@ -56,13 +56,13 @@ server {
   server_name signon.theodi.org;
   access_log /var/log/nginx/signon.log;
   error_log /var/log/nginx/signon.err;
+  root /var/www/signon/current/public/;
 
   location / {
     try_files $uri @backend;
   }
 
   location ~ ^/(assets)/  {
-    root /var/www/signon/current/public/;
     gzip_static on; # to serve pre-gzipped version
     expires max;
     add_header Cache-Control public;

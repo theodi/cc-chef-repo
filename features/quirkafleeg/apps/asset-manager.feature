@@ -54,6 +54,7 @@ server {
   server_name asset-manager.theodi.org;
   access_log /var/log/nginx/asset-manager.log;
   error_log /var/log/nginx/asset-manager.err;
+  root /var/www/asset-manager/current/public/;
 
   location / {
     try_files $uri @backend;
