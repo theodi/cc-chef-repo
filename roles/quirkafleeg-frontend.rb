@@ -62,6 +62,9 @@ default_attributes(
                 "^/news/.*11m-boost-open-data-innovation$"                                                         => "/news/11m-boost-open-data-innovation",
                 "^/news/inspiration-personal-data-odi.*s-midata-hackathon$"                                        => "/news/inspiration-personal-data-odi-s-midata-hackathon",
                 "^/blog/guest-blog-odi.*s-first-incubator-business-pioneering-open-data$"                          => "/blog/guest-blog-odi-s-first-incubator-business-pioneering-open-data",
+                "^/news/feed"                                                                                      => "/news.atom",
+                "^/jobs/feed"                                                                                      => "/jobs.atom",
+                "^/events/feed"                                                                                    => "/events.atom",
             }
         },
         #        'people'           => {
