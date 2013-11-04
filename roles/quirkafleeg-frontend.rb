@@ -68,9 +68,9 @@ default_attributes(
                 "^/news/odi-launches-..850k-scheme-create-businesses-open-data$"                                     => "/news/odi-launches-850k-scheme-create-businesses-open-data",
                 "^/news/..11m-boost-open-data-innovation$"                                                           => "/news/11m-boost-open-data-innovation",
                 "^/news/branding$"                                                                                   => "/newsroom",
-                "^/news/feed"                                                                                        => "/news.atom",
-                "^/jobs/feed"                                                                                        => "/jobs.atom",
-                "^/events/feed"                                                                                      => "/events.atom",
+                "^/news/feed$"                                                                                       => "/news.atom",
+                "^/jobs/feed$"                                                                                       => "/jobs.atom",
+                "^/events/feed$"                                                                                     => "/events.atom"
             }
         },
         #        'people'           => {
