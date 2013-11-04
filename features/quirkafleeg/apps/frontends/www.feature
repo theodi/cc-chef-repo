@@ -111,6 +111,9 @@ server {
   rewrite ^/media-release$ http://theodi.org/media-releases permanent;
   rewrite ^/media-release/(.*)$ http://theodi.org/media-releases/$1 permanent;
   rewrite ^/sites/default/files/360s/(.*)$ http://theodi.org/360s/$1 permanent;
+  rewrite ^/news/feed$ http://theodi.org/news.atom permanent;
+  rewrite ^/jobs/feed$ http://theodi.org/jobs.atom permanent;
+  rewrite ^/events/feed$ http://theodi.org/events.atom permanent;
   """
 
   @horrible
