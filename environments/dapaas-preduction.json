@@ -1,6 +1,6 @@
 {
-    "name": "quirkafleeg-preduction",
-    "description": "quirkafleeg-preduction",
+    "name": "dapaas-preduction",
+    "description": "dapaas-preduction",
     "cookbook_versions": {
         "quirkafleeg-deployment": "= 0.2.21",
         "hoppler": "= 0.3.0",
