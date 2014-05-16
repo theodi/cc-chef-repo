@@ -1,1 +1,0 @@
-default['nginx']['static_assets'] = true
