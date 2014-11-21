@@ -96,7 +96,8 @@ server {
   rewrite ^/content/crime-and-justice-series$ http://theodi.org/challenge-series/crime-and-justice permanent;
   rewrite ^/content/energy-and-environment-programme$ http://theodi.org/challenge-series/energy-and-environment permanent;
   rewrite ^/events/gallery$ http://theodi.org/events permanent;
-  rewrite ^/training$ http://theodi.org/learning permanent;
+  rewrite ^/training$ http://theodi.org/courses permanent;
+  rewrite ^/learning$ http://theodi.org/courses permanent;
   rewrite ^/excellence/pg_certificate$ http://theodi.org/pg-certificate permanent;
   rewrite ^/library$ http://theodi.org/ permanent;
   rewrite ^/guide$ http://theodi.org/guides permanent;

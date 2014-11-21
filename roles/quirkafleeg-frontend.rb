@@ -29,7 +29,7 @@ default_attributes(
                 "^/content/crime-and-justice-series$"                                                                => "/challenge-series/crime-and-justice",
                 "^/content/energy-and-environment-programme$"                                                        => "/challenge-series/energy-and-environment",
                 "^/events/gallery$"                                                                                  => "/events",
-                "^/training$"                                                                                        => "/learning",
+                "^/training$"                                                                                        => "/courses",
                 "^/excellence/pg_certificate$"                                                                       => "/pg-certificate",
                 "^/library$"                                                                                         => "/",
                 "^/guide$"                                                                                           => "/guides",
