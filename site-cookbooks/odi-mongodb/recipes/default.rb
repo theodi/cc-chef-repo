@@ -30,7 +30,7 @@ if node["rackspace"]
 end
 
 node.set['mongodb']['bind_ip'] = "%s,127.0.0.1" % bind_address
-node.save
+node.save unless Chef::Config[:solo]
 
 node.run_list << "mongodb"
 
